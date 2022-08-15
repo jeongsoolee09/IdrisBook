@@ -79,5 +79,6 @@ multMatrix lhs rhs = multMatrixInner lhs (transposeMat rhs)
     multMatrixInner (x :: xs) [] = [] :: multMatrixInner xs []
     multMatrixInner xs ys = processSingle xs ys
 
+
 -- λΠ> :total multMatrix
 -- Chapter3.multMatrix is Total
