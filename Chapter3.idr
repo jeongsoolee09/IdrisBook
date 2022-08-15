@@ -60,17 +60,24 @@ addMatrix (x :: xs) (y :: ys) = let added = Data.Vect.zipWith (+) x y in
 multMatrix : Num a => Vect n (Vect m a) -> Vect m (Vect k a) -> Vect n (Vect k a)
 multMatrix lhs rhs = multMatrixInner lhs (transposeMat rhs)
   where
-    sumOfProduct : (Num a, Num a) => (x : Vect m1 a) -> (y : Vect m1 a) -> a
+    sumOfProduct : Num a => (x : Vect m1 a) -> (y : Vect m1 a) -> a
     sumOfProduct x y = foldl (+) 0 (zipWith (*) x y)
 
-    processSingle : Num a => (x : Vect m1 a) -> (y : Vect m1 a) -> (xs : Vect len (Vect m1 a)) -> (ys : Vect len1 (Vect m1 a)) -> Vect (S len1) a
-    processSingle x y [] [] = sumOfProduct x y :: []
-    processSingle x y [] (z :: xs) = ?sumOfProduct_rhs_4
-    processSingle x y (z :: xs) [] = ?sumOfProduct_rhs_1
-    processSingle x y (z :: xs) (w :: ys) = ?sumOfProduct_rhs_5
+    sumsOfProducts : (Num a, Num a) => (x : Vect m1 a) -> (ys : Vect len1 (Vect m1 a)) -> Vect len1 a
+    sumsOfProducts x [] = []
+    sumsOfProducts x (y :: xs) = sumOfProduct x y :: sumsOfProducts x xs
+
+    processSingle : Num a => (xs : Vect n1 (Vect m1 a)) -> (ys : Vect k1 (Vect m1 a)) -> Vect n1 (Vect k1 a)
+    processSingle [] [] = []
+    processSingle [] (x :: xs) = []
+    processSingle (x :: xs) [] = [] :: processSingle xs []
+    processSingle (x::xs) (y::ys) = (sumOfProduct x y :: (sumsOfProducts x ys)) :: processSingle xs (y::ys)
 
     multMatrixInner : Num a => Vect n (Vect m a) -> Vect k (Vect m a) -> Vect n (Vect k a)
     multMatrixInner [] [] = []
     multMatrixInner [] (x :: xs) = []
     multMatrixInner (x :: xs) [] = [] :: multMatrixInner xs []
-    multMatrixInner (x :: xs) (y :: ys) = processSingle x y xs ys :: ?multMatrixInner_rhs_14
+    multMatrixInner xs ys = processSingle xs ys
+
+-- λΠ> :total multMatrix
+-- Chapter3.multMatrix is Total
